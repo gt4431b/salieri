@@ -1,0 +1,33 @@
+spring:
+  main:
+    web-application-type: none  # Disable web server for CLI
+    banner-mode: off
+  ai:
+    model:
+      audio:
+        speech: none
+        transcription: none
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+            model: ${OLLAMA_MODEL:llama3-groq-tool-use:latest} # Tools
+#            model: ${OLLAMA_MODEL:nexusraven:13b-q6_K}        # Tools on the fly in python
+#            model: ${ikiru/Dolphin-Mistral-24B-Venice-Edition:latest} # Uninhibited but no tools
+#    openai:
+#      api-key: ${OPENAI_API_KEY:}
+#      chat:
+#        options:
+#          model: ${OPENAI_MODEL:gpt-4}
+
+app:
+  llm:
+    provider: ${LLM_PROVIDER:ollama}
+    temperature: ${LLM_TEMPERATURE:0.3}
+
+logging:
+  level:
+    root: WARN
+    com.yourpackage: INFO  # Replace with your package
+  pattern:
+    console: "%d{HH:mm:ss} %-5level - %msg%n"
