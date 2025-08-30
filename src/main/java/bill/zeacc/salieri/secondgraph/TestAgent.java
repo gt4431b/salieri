@@ -23,6 +23,7 @@ public class TestAgent {
 //	    makeTheFace ( ) ;
 	}
 
+	@SuppressWarnings ( "unused" )
 	private static void testDirectToolCall3(
 		    OllamaChatModel model,
 		    ToolSpecification tool,
@@ -67,6 +68,7 @@ public class TestAgent {
 		    }
 		}
 
+	@SuppressWarnings ( "unused" )
 	private static void makeTheFace ( ) throws GraphStateException {
 		ToolSpecification weatherTool = ToolSpecification.builder()
 			    .name("get_weather")
