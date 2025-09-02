@@ -54,7 +54,8 @@ public class HybridRagPullerService implements RagPullerService {
             merged.putIfAbsent((String) d.getMetadata().get("chunk_id"), d);
         }
 
-        // 4) Radius search // REDO!  This is a wild attempt by the LLM but it's not anywhere close to right
+        // 4) Radius search // REDO!  This is a wild attempt by the LLM but it's not anywhere close to right.  See HybdiridizingSegmentMapper for what's needed.
+        // Also, if any chunk pulled is a title card, maybe we should pull the whole doc?
         for ( Document d : vectorDocs ) {
 			String chunkId = (String) d.getMetadata().get("chunk_id");
 			List<Map<String,Object>> radiusRows = jdbc.queryForList(
