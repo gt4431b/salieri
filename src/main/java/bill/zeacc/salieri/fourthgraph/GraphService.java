@@ -22,16 +22,22 @@ public class GraphService {
 
 		// Define conditional edge
 		AsyncEdgeAction <GraphState> routeOnTools = ( state ) -> {
-			if ( ! state.getToolCalls ( ).isEmpty ( ) && state.getToolResults ( ).isEmpty ( ) ) {
+			List <ToolCall> toolCalls = state.getToolCalls ( ) ;
+			List <ToolResponse> toolResults = state.getToolResults ( ) ;
+			if ( ! toolCalls.isEmpty ( ) && toolResults.isEmpty ( ) ) { // Given we're calling this before tool execution, what's the point of checking toolResults?
 				return CompletableFuture.completedFuture ( "tool_executor" ) ;
 			}
 			return CompletableFuture.completedFuture ( "formatter" ) ;
 		} ;
 
 		// Build graph
-		StateGraph <GraphState> graph = new StateGraph <> ( GraphState.SCHEMA, GraphState::new ).addNode ( "analyzer", toAsync ( analyzerNode ) )
-				.addNode ( "tool_executor", toAsync ( toolExecutorNode ) ).addNode ( "formatter", toAsync ( responseFormatterNode ) ).addEdge ( StateGraph.START, "analyzer" )
-				.addConditionalEdges ( "analyzer", routeOnTools, Map.of ( "tool_executor", "tool_executor", "formatter", "formatter" ) ).addEdge ( "tool_executor", "formatter" )
+		StateGraph <GraphState> graph = new StateGraph <> ( GraphState.SCHEMA, GraphState::new )
+				.addNode ( "analyzer", toAsync ( analyzerNode ) )
+				.addNode ( "tool_executor", toAsync ( toolExecutorNode ) )
+				.addNode ( "formatter", toAsync ( responseFormatterNode ) )
+				.addEdge ( StateGraph.START, "analyzer" )
+				.addConditionalEdges ( "analyzer", routeOnTools, Map.of ( "tool_executor", "tool_executor", "formatter", "formatter" ) )
+				.addEdge ( "tool_executor", "formatter" )
 				.addEdge ( "formatter", StateGraph.END ) ;
 
 		MemorySaver saver = new MemorySaver ( ) ;

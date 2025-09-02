@@ -72,7 +72,7 @@ public class LLMNode implements NodeAction<ToolState> {
             .messages(systemMessage, userMessage)
             .build();
         
-        ChatResponse response = model.chat(request);
+        ChatResponse response = model.doChat(request);
         AiMessage aiMessage = response.aiMessage();
         
         Map<String, Object> updates = new HashMap<>();

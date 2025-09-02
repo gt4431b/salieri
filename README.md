@@ -1,1 +1,8 @@
 # tchaikovsky
+
+Mary Had a Little Lamb
+
+Mary had a little lamb,
+Its fleece was white as snow;
+And everywhere that Mary went
+The lamb was sure to go.

@@ -1,0 +1,4 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/abillslife
+spring.datasource.username=abillslife
+spring.datasource.password=abillslife
+spring.datasource.driver-class-name=org.postgresql.Driver

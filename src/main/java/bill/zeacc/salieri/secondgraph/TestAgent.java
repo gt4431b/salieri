@@ -22,7 +22,7 @@ public class TestAgent {
 	    doTheThing ( ) ;
 //	    makeTheFace ( ) ;
 	}
-
+/** /
 	@SuppressWarnings ( "unused" )
 	private static void testDirectToolCall3(
 		    OllamaChatModel model,
@@ -67,7 +67,7 @@ public class TestAgent {
 		        System.out.println("Attributes: " + content.attributes());
 		    }
 		}
-
+/**/
 	@SuppressWarnings ( "unused" )
 	private static void makeTheFace ( ) throws GraphStateException {
 		ToolSpecification weatherTool = ToolSpecification.builder()
@@ -96,7 +96,7 @@ public class TestAgent {
 			        .temperature(0.3)   // Lower temperature for more deterministic behavior
 			        .build();
 
-			ChatResponse response = chatModel.chat(req);
+			ChatResponse response = chatModel.doChat(req);
 			System.out.println("Weather test response: " + response.aiMessage());
 	}
 	
@@ -150,7 +150,7 @@ public class TestAgent {
 		    );
 	    ChatMessage query = new UserMessage ( "What is the name of this computer?" ) ;
 	    ChatRequest req = ChatRequest.builder ( ).toolSpecifications ( tools ).messages ( systemMessage, query ).build ( ) ;
-	    ChatResponse response = model.chat ( req ) ;
+	    ChatResponse response = model.doChat ( req ) ;
 	    
 	    AiMessage content = response.aiMessage ( ) ;
 	    System.out.println("Direct response: " + content);

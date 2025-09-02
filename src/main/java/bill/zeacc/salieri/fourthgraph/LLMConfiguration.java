@@ -1,16 +1,10 @@
 package bill.zeacc.salieri.fourthgraph;
 
-import java.io.IOException ;
-import java.util.List ;
-
-import org.springframework.ai.chat.model.Generation ;
+import org.springframework.ai.chat.model.ChatModel ;
 import org.springframework.ai.model.tool.ToolCallingManager ;
-import org.springframework.ai.model.tool.ToolExecutionEligibilityPredicate ;
-import org.springframework.ai.ollama.OllamaChatModel ;
-import org.springframework.ai.ollama.api.OllamaApi ;
-import org.springframework.ai.ollama.api.OllamaOptions ;
-import org.springframework.ai.ollama.management.ModelManagementOptions ;
-import org.springframework.ai.ollama.management.PullModelStrategy ;
+import org.springframework.ai.openai.OpenAiChatModel ;
+import org.springframework.ai.openai.OpenAiChatOptions ;
+import org.springframework.ai.openai.api.OpenAiApi ;
 import org.springframework.ai.tool.resolution.SpringBeanToolCallbackResolver ;
 import org.springframework.ai.tool.resolution.ToolCallbackResolver ;
 import org.springframework.ai.util.json.schema.SchemaType ;
@@ -22,23 +16,16 @@ import org.springframework.context.annotation.Bean ;
 import org.springframework.context.annotation.Configuration ;
 import org.springframework.context.annotation.Primary ;
 import org.springframework.context.support.GenericApplicationContext ;
-import org.springframework.http.HttpStatusCode ;
-import org.springframework.http.client.ClientHttpResponse ;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy ;
 import org.springframework.retry.policy.SimpleRetryPolicy ;
 import org.springframework.retry.support.RetryTemplate ;
-import org.springframework.web.client.ResponseErrorHandler ;
-import org.springframework.web.client.RestClient ;
-import org.springframework.web.reactive.function.client.WebClient ;
-
-import com.fasterxml.jackson.databind.ObjectMapper ;
 
 import io.micrometer.observation.ObservationRegistry ;
 
 @Configuration
 @EnableConfigurationProperties(LLMProperties.class)
 public class LLMConfiguration {
-    
+/*// I officially give up on Ollama for now.  It seems to be too buggy and not well maintained.  Fun to run in local offline mode though.
 	@Bean
     @ConditionalOnProperty(name = "app.llm.provider", havingValue = "ollama")
 	@Primary
@@ -95,7 +82,7 @@ public class LLMConfiguration {
         // OllamaChatModel constructor needs api and options
         return new OllamaChatModel(ollamaApi, defaultOptions, toolCallingManager, observationRegistry, modelManagementOptions, toolExecutionEligibilityPredicate, retryTemplate);
     }
-
+*/
 	@Bean
 	public ToolCallingManager toolCallingManager ( ToolCallbackResolver resolver, ObservationRegistry observationRegistry ) {
 		return ToolCallingManager.builder ( )
@@ -121,8 +108,8 @@ public class LLMConfiguration {
         retryTemplate.setBackOffPolicy(new ExponentialBackOffPolicy());
         return retryTemplate;
     }
-/** /
-//	@Bean
+/**/
+	@Bean
     @ConditionalOnProperty(name = "app.llm.provider", havingValue = "openai")
 	@Primary
     public ChatModel openAiChatModel(

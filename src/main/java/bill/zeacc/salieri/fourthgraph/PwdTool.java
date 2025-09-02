@@ -1,38 +1,38 @@
 package bill.zeacc.salieri.fourthgraph ;
 
-//DateTimeTool.java
+//SystemInfoTool.java
 import org.springframework.stereotype.Component ;
 import lombok.extern.slf4j.Slf4j ;
-import java.time.ZonedDateTime ;
+
 import java.io.IOException ;
-import java.time.ZoneId ;
-import java.time.format.DateTimeFormatter ;
+import java.util.HashMap ;
 import java.util.Map ;
 
 @Component
 @Slf4j
-public class DateTimeTool extends BaseTool implements SpringTool {
+public class PwdTool extends BaseTool implements SpringTool {
 
 	@Override
 	public String getName ( ) {
-		return "getDateTime" ;
+		return "pwd" ;
 	}
 
 	@Override
 	public String getDescription ( ) {
-		return "Gets current date and time.  No parameters." ;
+		return "Gets current working directory." ;
 	}
 
 	@Override
 	public String executionSpec ( ) {
 		return """
-		{"invocation": "getDateTime", "args": []}
+		{"invocation": "pwd", "args": []}
 			""" ;
 	}
 
 	@Override
 	protected String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
-		ZonedDateTime now = ZonedDateTime.now ( ZoneId.systemDefault ( ) ) ;
-		return now.format ( DateTimeFormatter.RFC_1123_DATE_TIME ) ;
+		Map <String, String> info = new HashMap <> ( ) ;
+		info.put ( "pwd", System.getProperty ( "user.dir" ) ) ;
+		return info.toString ( ) ;
 	}
 }

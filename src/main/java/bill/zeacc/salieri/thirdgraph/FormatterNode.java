@@ -53,7 +53,7 @@ public class FormatterNode implements NodeAction<ToolState> {
             .messages(systemMessage, resultsMessage)
             .build();
         
-        ChatResponse response = model.chat(request);
+        ChatResponse response = model.doChat(request);
         String formattedResponse = response.aiMessage().text();
         System.err.println("Formatted response: " + formattedResponse);
         return Map.of(ToolState.MESSAGES_KEY, formattedResponse);

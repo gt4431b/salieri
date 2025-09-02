@@ -16,8 +16,13 @@ public class GraphState extends AgentState {
 	public static final String TOOL_RESULTS_KEY = "tool_results" ;
 	public static final String FINAL_ANSWER_KEY = "final_answer" ;
 
-	public static final Map <String, Channel <?>> SCHEMA = Map.of ( QUERY_KEY, Channels.appender ( ArrayList::new ), MESSAGES_KEY, Channels.appender ( ArrayList::new ), TOOL_CALLS_KEY,
-			Channels.appender ( ArrayList::new ), TOOL_RESULTS_KEY, Channels.appender ( ArrayList::new ), FINAL_ANSWER_KEY, Channels.appender ( ArrayList::new ), ANALYSIS_KEY, Channels.base ( ( a, b ) -> b ) ) ;
+	public static final Map <String, Channel <?>> SCHEMA = Map.of (
+			QUERY_KEY, Channels.base ( ( a, b ) -> b ),
+			MESSAGES_KEY, Channels.appender ( ArrayList::new ),
+			TOOL_CALLS_KEY, Channels.base ( ( a, b ) -> b ),
+			TOOL_RESULTS_KEY, Channels.base ( ( a, b ) -> b ),
+			FINAL_ANSWER_KEY, Channels.base ( ( a, b ) -> b ),
+			ANALYSIS_KEY, Channels.base ( ( a, b ) -> b ) ) ;
 
 	public GraphState ( ) {
 		super ( new HashMap <> ( ) ) ;
@@ -28,8 +33,7 @@ public class GraphState extends AgentState {
 	}
 
 	public String getQuery ( ) {
-		List <String> queries = this.<List <String>>value ( QUERY_KEY ).orElse ( List.of ( ) ) ;
-		return queries.isEmpty ( ) ? "" : queries.get ( queries.size ( ) - 1 ) ;
+		return this.<String>value ( QUERY_KEY ).orElse ( "" ) ;
 	}
 
 	public List <ChatMsg> getMessages ( ) {
@@ -45,7 +49,6 @@ public class GraphState extends AgentState {
 	}
 
 	public String getFinalAnswer ( ) {
-		List <String> answers = this.<List <String>>value ( FINAL_ANSWER_KEY ).orElse ( List.of ( ) ) ;
-		return answers.isEmpty ( ) ? "" : answers.get ( answers.size ( ) - 1 ) ;
+		return this.<String>value ( FINAL_ANSWER_KEY ).orElse ( "" ) ;
 	}
 }

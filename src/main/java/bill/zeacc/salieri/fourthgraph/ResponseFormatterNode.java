@@ -41,10 +41,14 @@ public class ResponseFormatterNode implements NodeAction <GraphState> {
 		}
 
 //		String query = state.getQuery ( ) ;
-		List <ToolResponse> toolResults = state.getToolResults ( ) ;
+		List <ToolCall> toolCalls = state.getToolCalls ( ) ;
+		if ( toolCalls != null && ! toolCalls.isEmpty ( ) ) {
+			springMessages.add ( convertToAssistantMessage ( toolCalls ) ) ;
+		}
 
+		List <ToolResponse> toolResults = state.getToolResults ( ) ;
 		if ( ! toolResults.isEmpty ( ) ) {
-			toolResults.forEach ( tr -> springMessages.add ( new ToolResponseMessage ( List.of ( new org.springframework.ai.chat.messages.ToolResponseMessage.ToolResponse ( null, tr.toolName ( ), tr.output ( ) ) ) ) ) ) ;
+			toolResults.forEach ( tr -> springMessages.add ( new ToolResponseMessage ( List.of ( new org.springframework.ai.chat.messages.ToolResponseMessage.ToolResponse ( tr.getId ( ), tr.getToolName ( ), tr.getOutput ( ) ) ) ) ) ) ;
 		}
 //		springMessages.add(new AssistantMessage( "Answer this query conversationally: %s".formatted ( query ) ) ) ;
 
@@ -59,5 +63,14 @@ public class ResponseFormatterNode implements NodeAction <GraphState> {
 	            GraphState.FINAL_ANSWER_KEY, answer,
 	            GraphState.MESSAGES_KEY, List.of(new ChatMsg(ChatMsg.Role.ASSISTANT, answer))
 	        );
+	}
+
+	private Message convertToAssistantMessage ( List <ToolCall> calls ) {
+		List <org.springframework.ai.chat.messages.AssistantMessage.ToolCall> toolCalls = new ArrayList<> ( ) ;
+		for ( ToolCall call : calls ) {
+			toolCalls.add ( new org.springframework.ai.chat.messages.AssistantMessage.ToolCall ( call.getId ( ), "function", call.getName ( ), call.getArguments ( ) ) ) ;
+		}
+		AssistantMessage am = new AssistantMessage ( "", Map.of ( ), toolCalls ) ;
+		return am ;
 	}
 }

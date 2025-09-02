@@ -9,16 +9,34 @@ spring:
         transcription: none
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
-      chat:
-        options:
-            model: ${OLLAMA_MODEL:llama3-groq-tool-use:latest} # Tools
-#            model: ${OLLAMA_MODEL:nexusraven:13b-q6_K}        # Tools on the fly in python
-#            model: ${ikiru/Dolphin-Mistral-24B-Venice-Edition:latest} # Uninhibited but no tools
-#    openai:
-#      api-key: ${OPENAI_API_KEY:}
 #      chat:
 #        options:
-#          model: ${OPENAI_MODEL:gpt-4}
+#            model: ${OLLAMA_MODEL:llama3-groq-tool-use:latest} # Tools
+#            model: ${OLLAMA_MODEL:nexusraven:13b-q6_K}        # Tools on the fly in python
+#            model: ${ikiru/Dolphin-Mistral-24B-Venice-Edition:latest} # Uninhibited but no tools
+    openai:
+      api-key: ${OPENAI_API_KEY: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}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+    vectorstore:
+      pgvector:
+        host: ${PGVECTOR_HOST:localhost}
+        port: ${PGVECTOR_PORT:5432}
+        database: ${PGVECTOR_DATABASE:abillslife}
+        user: ${PGVECTOR_USER:abillslife}
+        password: ${PGVECTOR_PASSWORD:abillslife}
+        schema: ${PGVECTOR_SCHEMA:public}
+        tableName: ${PGVECTOR_TABLE:rag_chunks}
+        embedding-model: ${EMBEDDING_MODEL:text-embedding-3-small}
+        dimensions: ${EMBEDDING_DIMENSIONS:1536}
+        index-type: ${INDEX_TYPE:hnsw}
+        distane-metric: ${DISTANCE_METRIC:cosine}
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/abillslife}
+    username: ${DATABASE_USER:abillslife}
+    password: ${DATABASE_PASSWORD:abillslife}
+    driver-class-name: org.postgresql.Driver
 
 app:
   llm:

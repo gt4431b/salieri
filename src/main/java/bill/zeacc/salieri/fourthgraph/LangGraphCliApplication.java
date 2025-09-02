@@ -6,7 +6,8 @@ import org.springframework.boot.SpringApplication ;
 import org.springframework.boot.autoconfigure.SpringBootApplication ;
 import org.springframework.boot.context.properties.EnableConfigurationProperties ;
 import org.springframework.context.annotation.Bean ;
-import java.util.Scanner ;
+import org.springframework.context.annotation.Profile ;
+
 import lombok.extern.slf4j.Slf4j ;
 
 @SpringBootApplication
@@ -19,39 +20,35 @@ public class LangGraphCliApplication {
 	}
 
 	@Bean
+	@Profile("!test")
 	public CommandLineRunner commandLineRunner ( GraphService graphService ) {
 		return args -> {
-			Scanner scanner = new Scanner ( System.in ) ;
+			DebouncedStdInBlocks.CliContext ctx = new DebouncedStdInBlocks.CliContext ( ) ;
+			DebouncedStdInBlocks reader = new DebouncedStdInBlocks ( ctx, System.in, 2000, (input, done) -> {
+	            try {
+					input = input.trim ( ) ;
+					if ( input.equalsIgnoreCase ( "exit" ) || input.equalsIgnoreCase ( "quit" ) ) {
+						System.out.println ( "\nGoodbye!" ) ;
+						ctx.stop ( ) ;
+					}
 
-			System.out.println ( "=================================" ) ;
-			System.out.println ( "LangGraph CLI Chat" ) ;
-			System.out.println ( "Type 'exit' or 'quit' to end" ) ;
-			System.out.println ( "=================================\n" ) ;
+					if ( input.trim ( ).isEmpty ( ) ) {
+						return ;
+					}
 
-			while ( true ) {
-				System.out.print ( "You: " ) ;
-				String input = scanner.nextLine ( ) ;
-
-				if ( input.equalsIgnoreCase ( "exit" ) || input.equalsIgnoreCase ( "quit" ) ) {
-					System.out.println ( "\nGoodbye!" ) ;
-					break ;
-				}
-
-				if ( input.trim ( ).isEmpty ( ) ) {
-					continue ;
-				}
-
-				try {
-					String response = graphService.processQuery ( input ) ;
-					System.out.println ( "\nAssistant: " + response + "\n" ) ;
-				} catch ( Exception e ) {
-					log.error ( "Error processing query", e ) ;
-					System.err.println ( "Error: " + e.getMessage ( ) + "\n" ) ;
-				}
-			}
-
-			scanner.close ( ) ;
-			System.exit ( 0 ) ;
+					try {
+						String response = graphService.processQuery ( input ) ;
+						System.out.println ( "\nAssistant: " + response + "\n" ) ;
+					} catch ( Exception e ) {
+						log.error ( "Error processing query", e ) ;
+						System.err.println ( "Error: " + e.getMessage ( ) + "\n" ) ;
+					}
+	            } finally {
+	                done.run(); // IMPORTANT: signal ready for the next block
+	            }
+	        });
+			reader.start();
+	        try { Thread.currentThread().join(); } catch (InterruptedException ignored) {}
 		} ;
 	}
 }
