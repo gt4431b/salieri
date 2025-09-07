@@ -72,6 +72,6 @@ public class HybridRagPullerService implements RagPullerService {
 		}
 
         // Return the first N merged results (you might choose a larger K here)
-        return new ArrayList<>(merged.values()).subList(0, Math.min(topK, merged.size()));
+        return new ArrayList<>(merged.values()).subList(0, Math.min(topK, merged.size()));  // Maybe if we're doing radius search, we should return more than topK?  Or filter by topK before step 4.
     }
 }
