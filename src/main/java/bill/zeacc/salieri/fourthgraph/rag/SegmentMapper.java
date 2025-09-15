@@ -5,5 +5,5 @@ import dev.langchain4j.data.segment.TextSegment ;
 
 public interface SegmentMapper {
 
-	public Document toSpringDoc ( TextSegment segment, RagIngestionContext ctx ) ;
+	public Document toSpringDoc ( TextSegment segment, RagIngestionTreeContext ctx ) ;
 }

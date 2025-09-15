@@ -19,7 +19,7 @@ public class HybridizingSegmentMapper implements SegmentMapper {
     }
 
     @Override
-    public Document toSpringDoc(TextSegment segment, RagIngestionContext ctx) {
+    public Document toSpringDoc(TextSegment segment, RagIngestionTreeContext ctx) {
         Map<String, Object> meta = new HashMap<>(segment.metadata().toMap());
 
         String batchId = ctx.getProperty ( HybridizableRagIngestionKey.BATCH_ID, String.class ) ;

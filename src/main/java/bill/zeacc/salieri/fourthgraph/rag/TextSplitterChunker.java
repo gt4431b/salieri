@@ -18,7 +18,7 @@ public class TextSplitterChunker implements TextChunker {
 	}
 
 	@Override
-	public List <TextSegment> split ( Document document, RagIngestionContext ctx ) {
+	public List <TextSegment> split ( Document document, RagIngestionTreeContext ctx ) {
 		return splitter.split ( document ) ;
 	}
 }

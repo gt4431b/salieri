@@ -6,5 +6,10 @@ import org.springframework.ai.document.Document ;
 
 public interface RagPullerService {
 
-	public List <Document> search ( String query, int topK ) ;
+	public interface ResultGroup {
+		public String name ( ) ;
+		public String namespace ( ) ;
+	}
+
+	public List <Document> search ( String query, DocumentSearchOptions options ) ;
 }

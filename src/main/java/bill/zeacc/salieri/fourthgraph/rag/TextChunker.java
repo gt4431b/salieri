@@ -6,5 +6,5 @@ import java.util.List ;
 
 public interface TextChunker {
 
-	public List <TextSegment> split ( Document document, RagIngestionContext ctx  ) ;
+	public List <TextSegment> split ( Document document, RagIngestionTreeContext ctx  ) ;
 }

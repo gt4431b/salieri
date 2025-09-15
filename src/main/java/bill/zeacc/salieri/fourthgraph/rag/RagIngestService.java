@@ -3,6 +3,8 @@ package bill.zeacc.salieri.fourthgraph.rag ;
 import dev.langchain4j.data.document.Document ;               // <-- LangChain4j Document
 import dev.langchain4j.data.segment.TextSegment ;             // <-- LangChain4j TextSegment
 import org.springframework.ai.vectorstore.VectorStore ;
+import org.springframework.core.io.FileSystemResource ;
+import org.springframework.core.io.InputStreamSource ;
 import org.springframework.stereotype.Component ;
 
 import java.io.File ;
@@ -36,21 +38,22 @@ public class RagIngestService {
 	}
 
 	/** Walk a directory and ingest supported files */
-	public void indexPath ( Path root ) throws IOException {
-		RagIngestionContext ctx = new RagIngestionContext ( ) ;
+	public void indexPath ( Path root, String contentType ) throws IOException {
+		RagIngestionTreeContext ctx = new RagIngestionTreeContext ( ) ;
 		ctx.setBatchRoot ( root ) ;
 		ctx.setProperty ( HybridizableRagIngestionKey.BATCH_ID, UUID.randomUUID ( ).toString ( ) ) ;
 		List <File> files = collectFiles ( root ) ;
 
 		List <org.springframework.ai.document.Document> batch = new ArrayList <> ( batchSize ) ;            // Spring AI Document
 		for ( File file : files ) {
-			CorpusParser parser = findParser ( file, ctx ) ;
+			CorpusParser parser = findParser ( contentType, ctx ) ;
 			if ( parser == null )
 				continue ;
 
 			ctx.setCurrentFile ( file ) ;
 			ctx.setProperty ( HybridizableRagIngestionKey.FILE_ID, UUID.randomUUID ( ).toString ( ) ) ;
-			List <Document> docs = parser.parse ( file, ctx ) ;                      // LangChain4j Document
+			InputStreamSource fis = new FileSystemResource ( file ) ;
+			List <Document> docs = parser.parse ( fis, ctx ) ;                      // LangChain4j Document
 			for ( Document doc : docs ) {
 				ctx.setCurrentDocument ( doc ) ;
 				ctx.setProperty ( HybridizableRagIngestionKey.DOC_ID, UUID.randomUUID ( ).toString ( ) ) ;
@@ -81,9 +84,9 @@ public class RagIngestService {
 		return files ;
 	}
 
-	private CorpusParser findParser ( File file, RagIngestionContext ctx ) {
+	private CorpusParser findParser ( String contentType, RagIngestionTreeContext ctx ) {
 		for ( CorpusParser p : parsers ) {
-			if ( p.supports ( file, ctx ) )
+			if ( p.supports ( contentType, ctx ) )
 				return p ;
 		}
 		return null ;

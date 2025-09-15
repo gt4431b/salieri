@@ -4,6 +4,7 @@ spring:
     banner-mode: off
   ai:
     model:
+      embedding: openai
       audio:
         speech: none
         transcription: none
@@ -19,6 +20,10 @@ spring:
       chat:
         options:
           model: ${OPENAI_MODEL:gpt-4o-mini}
+      embedding:
+        options:
+          model: ${EMBEDDING_MODEL:text-embedding-3-small}
+
     vectorstore:
       pgvector:
         host: ${PGVECTOR_HOST:localhost}
@@ -31,7 +36,7 @@ spring:
         embedding-model: ${EMBEDDING_MODEL:text-embedding-3-small}
         dimensions: ${EMBEDDING_DIMENSIONS:1536}
         index-type: ${INDEX_TYPE:hnsw}
-        distane-metric: ${DISTANCE_METRIC:cosine}
+        distance-metric: ${DISTANCE_METRIC:cosine}
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/abillslife}
     username: ${DATABASE_USER:abillslife}

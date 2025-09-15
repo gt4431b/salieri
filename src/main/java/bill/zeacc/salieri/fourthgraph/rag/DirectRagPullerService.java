@@ -16,10 +16,10 @@ public class DirectRagPullerService implements RagPullerService {
     /**
      * Returns the top K similar chunks to the query text.
      */
-    public List <Document> search ( String query, int topK ) {
+    public List <Document> search ( String query, DocumentSearchOptions options ) {
         SearchRequest req = SearchRequest.builder()
             .query(query)
-            .topK(topK)
+            .topK(options.getSearchTopK().getOrDefault(DocumentSearchOptions.SearchType.VECTOR, options.getTopK()))
             .similarityThreshold(0.0) // adjust threshold if you want to filter weak matches
             .build();
         return vectorStore.similaritySearch(req);
