@@ -1,4 +1,4 @@
-package bill.zeacc.salieri.fourthgraph ;
+package bill.zeacc.salieri.fifthgraph.nodes ;
 
 import org.bsc.langgraph4j.action.NodeAction ;
 import org.springframework.ai.chat.messages.SystemMessage ;
@@ -7,31 +7,33 @@ import org.springframework.ai.chat.messages.UserMessage ;
 import org.springframework.ai.chat.model.ChatModel ;
 import org.springframework.ai.chat.prompt.Prompt ;
 import org.springframework.beans.factory.annotation.Autowired ;
-import org.springframework.stereotype.Component ;
+import org.springframework.beans.factory.annotation.Qualifier ;
 
 import com.fasterxml.jackson.core.JsonProcessingException ;
 import com.fasterxml.jackson.databind.ObjectMapper ;
 
+import bill.zeacc.salieri.fifthgraph.model.meta.InternalTool ;
+import bill.zeacc.salieri.fifthgraph.model.meta.ToolCall ;
+import bill.zeacc.salieri.fifthgraph.model.meta.ToolChooser ;
+import bill.zeacc.salieri.fifthgraph.model.states.ToolOrientedState ;
 import lombok.extern.slf4j.Slf4j ;
 import java.util.* ;
 
-@Component
 @Slf4j
-public class AnalyzerNode implements NodeAction <GraphState> {
+public abstract class ToolAnalyzerNode implements NodeAction <ToolOrientedState> {
 
-	@Autowired
 	private final ChatModel chatModel ;
-	@Autowired
-	private List <SpringTool> availableTools ;
+	private List <InternalTool> availableTools ;
 	@Autowired
 	private ObjectMapper om ;
 
-	public AnalyzerNode ( ChatModel chatModel ) {
+	protected ToolAnalyzerNode ( ChatModel chatModel, @Qualifier ( "helloTools" ) ToolChooser toolProvider ) {
 		this.chatModel = chatModel ;
+		this.availableTools = toolProvider.get ( ) ;
 	}
 
 	@Override
-	public Map <String, Object> apply ( GraphState state ) {
+	public Map <String, Object> apply ( ToolOrientedState state ) {
 		String query = state.getQuery ( ) ;
 		log.info ( "Analyzing query: {}", query ) ;
 
@@ -41,7 +43,7 @@ public class AnalyzerNode implements NodeAction <GraphState> {
 		log.debug ( "Analyzer response: {}", strResponse ) ;
 
 		Map <String, Object> updates = new HashMap <> ( ) ;
-		updates.put ( GraphState.ANALYSIS_KEY, strResponse ) ;
+		updates.put ( ToolOrientedState.ANALYSIS_KEY, strResponse ) ;
 
 		AnalysisResult analysisResult ;
 		try {
@@ -57,15 +59,15 @@ public class AnalyzerNode implements NodeAction <GraphState> {
 				toolCalls.add ( parseToolCall ( UUID.randomUUID ( ).toString ( ), tool ) ) ;
 			}
 		}
-		updates.put ( GraphState.TOOL_CALLS_KEY, toolCalls ) ;
-		updates.put ( GraphState.TOOL_RESULTS_KEY, new ArrayList <> ( ) ) ;
+		updates.put ( ToolOrientedState.TOOL_CALLS_KEY, toolCalls ) ;
+		updates.put ( ToolOrientedState.TOOL_RESULTS_KEY, new ArrayList <> ( ) ) ;
 
 		return updates ;
 	}
 
 	private ToolCall parseToolCall ( String invocationId, Invocation tool ) {
 		String toolName = tool.invocation ( ) ;
-		Optional <SpringTool> matchingTool = availableTools.stream ( ).filter ( t -> t.getName ( ).equals ( toolName ) ).findFirst ( ) ;
+		Optional <InternalTool> matchingTool = availableTools.stream ( ).filter ( t -> t.getName ( ).equals ( toolName ) ).findFirst ( ) ;
 		if ( matchingTool.isEmpty ( ) ) {
 			throw new IllegalArgumentException ( "Requested tool not found: " + toolName ) ;
 		}
@@ -87,21 +89,6 @@ public class AnalyzerNode implements NodeAction <GraphState> {
 			throw new RuntimeException ( "Failed to serialize tool arguments for tool: " + toolName, e ) ;
 		}
 		return new ToolCall ( invocationId, toolName, argsJson ) ;
-	}
-
-	@SuppressWarnings ( "unused" )
-	private String buildPrompt1 ( String query ) {
-		StringBuilder prompt = new StringBuilder ( ) ;
-		prompt.append ( "Analyze this query and determine if tools are needed: \"" ).append ( query ).append ( "\"" ).append ( System.lineSeparator ( ) ) ;
-		for ( SpringTool tool : availableTools ) {
-			prompt.append ( "Tool: " ).append ( tool.getName ( ) ).append ( " - " ).append ( tool.getDescription ( ) ).append ( " - invocation spec: " ).append ( tool.executionSpec ( ) ).append ( System.lineSeparator ( ) ) ;
-		}
-		prompt.append ( "Respond with JSON only: {\"needsTools\": true/false, \"tools\": [\"tool1\", \"tool2\"]}.\n" ) ;
-		prompt.append ( " If no tools are needed, respond with {\"needsTools\": false, \"tools\": []}.\n" ) ;
-		prompt.append ( " Each tool invocation in the tools array must match this json spec: {\"invocation\": \"<toolName>\", \"args\": [{\"argName\": \"param1\", \"type\": \"String/Number/Boolean\", \"stringValue\": \"<string value to pass>\"}, \"justification\": \"<why you think we need this tool>\"}]}\n" ) ;
-		prompt.append ( " Only use the tools listed above.  If arguments are needed you must provide the parameterized string with parameter name as given in the invocation spec given.  Quotes are not needed for Strings.\n" ) ;
-		prompt.append ( " If no arguments are needed, use empty parens.  Do not nest calls.  Do not include calls unless we actually need them to answer the original query\n" ) ;
-		return prompt.toString ( ) ;
 	}
 
 	private SystemMessage buildSystemPrompt ( String query ) {
@@ -222,7 +209,7 @@ _Output:*
 
 	private String buildToolList ( ) {
 		StringBuilder sb = new StringBuilder ( ) ;
-		for ( SpringTool tool : availableTools ) {
+		for ( InternalTool tool : availableTools ) {
 			sb.append ( "Tool: " ).append ( tool.getName ( ) ).append ( " - " ).append ( tool.getDescription ( ) ).append ( " - invocation spec: " ).append ( tool.executionSpec ( ) ).append ( System.lineSeparator ( ) ) ;
 		}
 		return sb.toString ( ) ;

@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest ;
 import org.springframework.context.annotation.ComponentScan ;
 import org.springframework.test.context.ActiveProfiles ;
 
+import bill.zeacc.salieri.fourthgraph.rag.HybridRagService ;
 import bill.zeacc.salieri.fourthgraph.rag.RagIngestService ;
 
 /**
@@ -29,14 +30,17 @@ public class AppTest {
 	@Autowired
 	private RagIngestService ingestSvc ;
 
-//	@Test
+	@Autowired
+	private HybridRagService ragSvc ;
+
+	@Test
 	public void ingestFile ( ) throws Exception {
 		String path1 = "/home/bill/Downloads/fictional_ai_story.pdf" ;
 		String path2 = "/home/bill/Downloads/session_summary.pdf" ;
 		Path p1 = Path.of ( path1 ) ;
 		Path p2 = Path.of ( path2 ) ;
-		ingestSvc.indexPath ( p1 ) ;
-		ingestSvc.indexPath ( p2 ) ;
+		ragSvc.ingestPath ( p1, "application/pdf" ) ;
+		ragSvc.ingestPath ( p2, "application/pdf" ) ;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package bill.zeacc.salieri.fourthgraph ;
+package bill.zeacc.salieri.fifthgraph ;
 
 //Salieri.java - Main application class
 import org.springframework.boot.CommandLineRunner ;
@@ -8,20 +8,29 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean ;
 import org.springframework.context.annotation.Profile ;
 
+import com.fasterxml.jackson.databind.ObjectMapper ;
+
+import bill.zeacc.salieri.fifthgraph.agents.switchboard.SwitchboardState ;
+import bill.zeacc.salieri.fifthgraph.config.LLMProperties ;
+import bill.zeacc.salieri.fifthgraph.model.states.ResultOrientedState ;
+import bill.zeacc.salieri.fifthgraph.service.GraphService ;
+import bill.zeacc.salieri.fifthgraph.util.DebouncedStdInBlocks ;
 import lombok.extern.slf4j.Slf4j ;
 
 @SpringBootApplication
 @EnableConfigurationProperties ( LLMProperties.class )
 @Slf4j
-public class LangGraphCliApplication {
+public class Salieri {
 
 	public static void main ( String [ ] args ) {
-		SpringApplication.run ( LangGraphCliApplication.class, args ) ;
+		SpringApplication.run ( Salieri.class, args ) ;
 	}
 
 	@Bean
 	@Profile("!test")
-	public CommandLineRunner commandLineRunner ( GraphService graphService ) {
+	public CommandLineRunner commandLineRunner ( GraphService graphService, ObjectMapper om ) {
+		String sessionId = java.util.UUID.randomUUID ( ).toString ( ) ;
+		System.out.println ( "Assistant: Hello! How can I assist you today?" ) ;
 		return args -> {
 			DebouncedStdInBlocks.CliContext ctx = new DebouncedStdInBlocks.CliContext ( ) ;
 			DebouncedStdInBlocks reader = new DebouncedStdInBlocks ( ctx, System.in, 2000, (input, done) -> {
@@ -37,8 +46,15 @@ public class LangGraphCliApplication {
 					}
 
 					try {
-						String response = graphService.processQuery ( input ) ;
-						System.out.println ( "\nAssistant: " + response + "\n" ) ;
+						ResultOrientedState response = graphService.processQuery ( "switchboard_agent", input, sessionId ) ;
+						String nextAgent = ( String ) response.value ( SwitchboardState.RECOMMENDED_AGENT_KEY ).get ( ) ;
+						Integer confidence = ( Integer ) response.value ( SwitchboardState.CONFIDENCE_KEY ).get ( ) ;
+						if ( confidence < 50 ) {
+							nextAgent = "default_agent" ;
+						}
+						response = graphService.processQuery ( nextAgent, input, sessionId ) ;
+						String result = response.getFinalAnswer ( ) ;
+						System.out.println ( "\nAssistant: " + result + "\n" ) ;
 					} catch ( Exception e ) {
 						log.error ( "Error processing query", e ) ;
 						System.err.println ( "Error: " + e.getMessage ( ) + "\n" ) ;

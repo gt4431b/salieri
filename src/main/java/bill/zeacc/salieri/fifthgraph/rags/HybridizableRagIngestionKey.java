@@ -1,4 +1,4 @@
-package bill.zeacc.salieri.fourthgraph.rag;
+package bill.zeacc.salieri.fifthgraph.rags;
 
 
 public enum HybridizableRagIngestionKey implements RagIngestionKey {
