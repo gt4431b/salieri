@@ -5,6 +5,7 @@ import java.io.IOException ;
 import java.io.InputStreamReader ;
 import java.nio.charset.StandardCharsets ;
 import java.util.List ;
+import java.util.Set ;
 
 import org.springframework.core.io.InputStreamSource ;
 
@@ -33,8 +34,12 @@ public class TextCorpusParser implements CorpusParser {
 		return name == null ? "unknown" : name ;
 	}
 
+	private static final Set <String> SUPPORTED_CONTENT_TYPES = Set.of ( "text/plain", "text/csv", "application/json", "text/markdown", "text/html" ) ;
 	@Override
 	public boolean supports ( String contentType, RagIngestionTreeContext ctx ) {
-		return "text/plain".equals ( contentType ) || "text/csv".equals ( contentType ) || "application/json".equals ( contentType ) ;
+		if ( contentType == null ) {
+			return false ;
+		}
+		return SUPPORTED_CONTENT_TYPES.contains ( contentType ) ;
 	}
 }

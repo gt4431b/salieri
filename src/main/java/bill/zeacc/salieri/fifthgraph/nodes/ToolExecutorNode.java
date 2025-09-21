@@ -17,7 +17,7 @@ public abstract class ToolExecutorNode implements NodeAction <ToolOrientedState>
 	private final Map <String, InternalTool> toolMap ;
 
 	protected ToolExecutorNode ( ToolChooser toolProvider ) {
-		List <InternalTool> tools = toolProvider.get ( ) ;
+		List <InternalTool> tools =  toolProvider == null ? Collections.emptyList ( ) : toolProvider.get ( ) ;
 		this.toolMap = new HashMap <> ( ) ;
 		for ( InternalTool tool : tools ) {
 			toolMap.put ( tool.getName ( ), tool ) ;

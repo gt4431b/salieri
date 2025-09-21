@@ -45,6 +45,9 @@ public class HelloAgentConfig {
 	public AgentDefinition <GraphState> helloAgent ( @Qualifier ( "helloToolAnalyzerNode" ) ToolAnalyzerNode analyzerNode,
 								@Qualifier ( "helloToolExecutorNode" ) ToolExecutorNode toolExecutorNode,
 								@Qualifier ( "helloResponseFormatterNode" ) ResponseFormatterNode responseFormatterNode ) throws GraphStateException {
+		if ( analyzerNode == null || toolExecutorNode == null || responseFormatterNode == null ) {
+			throw new IllegalStateException ( "analyzerNode is null" ) ;
+		}
 		// Define conditional edge
 		AsyncEdgeAction <GraphState> routeOnTools = ( state ) -> {
 			List <ToolCall> toolCalls = state.getToolCalls ( ) ;

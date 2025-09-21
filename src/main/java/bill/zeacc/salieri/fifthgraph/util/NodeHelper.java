@@ -1,5 +1,6 @@
 package bill.zeacc.salieri.fifthgraph.util;
 
+import java.util.Map ;
 import java.util.concurrent.CompletableFuture ;
 
 import org.bsc.langgraph4j.action.AsyncNodeAction ;
@@ -10,11 +11,22 @@ public class NodeHelper {
 	public static <T extends AgentState, S extends T> AsyncNodeAction <S> toAsync ( NodeAction <T> action ) {
 		return ( state ) -> {
 			try {
-				return CompletableFuture.completedFuture ( action.apply ( state ) ) ;
+				return CompletableFuture.supplyAsync ( ( ) -> rt ( action, state ) ) ;
+			} catch ( RuntimeException re ) {
+				throw re ;
 			} catch ( Exception e ) {
-				e.printStackTrace();
 				throw new RuntimeException ( e ) ;
 			}
 		} ;
+	}
+
+	static <T extends AgentState, S extends T> Map <String, Object> rt ( NodeAction <T> action, S state ) {
+		try {
+			return action.apply ( state ) ;
+		} catch ( RuntimeException re ) {
+			throw re ;
+		} catch ( Exception e ) {
+			throw new RuntimeException ( e ) ;
+		}
 	}
 }

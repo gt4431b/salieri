@@ -18,11 +18,17 @@ public class JustChatConfig {
 
 	@Bean
 	public ResponseFormatterNode justChatResponseFormatterNode ( ChatModel chatModel ) {
+		if ( chatModel == null ) {
+			throw new IllegalStateException ( "ChatModel bean not found. Ensure Spring AI is configured properly." ) ;
+		}
 		return new ResponseFormatterNode ( chatModel, "You will answer queries by talking like a pirate." ) { } ;
 	}
 
 	@Bean
 	public AgentDefinition <ToolOrientedState> justChatAgent ( @Qualifier ( "justChatResponseFormatterNode" ) ResponseFormatterNode responseFormatterNode ) throws GraphStateException {
+		if ( responseFormatterNode == null ) {
+			throw new IllegalStateException ( "ResponseFormatterNode bean not found. Ensure JustChatConfig is configured properly." ) ;
+		}
 		StateGraph <ToolOrientedState> graph = new StateGraph <> ( ToolOrientedState.SCHEMA, ToolOrientedState::new )
 				.addNode ( "formatter", toAsync ( responseFormatterNode ) )
 				.addEdge ( StateGraph.START, "formatter" )

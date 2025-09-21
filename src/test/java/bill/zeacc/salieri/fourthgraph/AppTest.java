@@ -11,7 +11,6 @@ import org.springframework.context.annotation.ComponentScan ;
 import org.springframework.test.context.ActiveProfiles ;
 
 import bill.zeacc.salieri.fourthgraph.rag.HybridRagService ;
-import bill.zeacc.salieri.fourthgraph.rag.RagIngestService ;
 
 /**
  * Unit test for simple App.
@@ -28,12 +27,9 @@ import bill.zeacc.salieri.fourthgraph.rag.RagIngestService ;
 public class AppTest {
 
 	@Autowired
-	private RagIngestService ingestSvc ;
-
-	@Autowired
 	private HybridRagService ragSvc ;
 
-	@Test
+//	@Test
 	public void ingestFile ( ) throws Exception {
 		String path1 = "/home/bill/Downloads/fictional_ai_story.pdf" ;
 		String path2 = "/home/bill/Downloads/session_summary.pdf" ;

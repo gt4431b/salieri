@@ -40,7 +40,7 @@ public class FileReaderTool extends BaseInternalTool implements InternalTool, In
 	}
 
 	@Override
-	protected String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
+	public String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
 		String fileName = (String) argsMap.get ( "fileName" ) ;
 		Path path = Paths.get ( fileName ) ;
 		return Files.readString ( path ) ;

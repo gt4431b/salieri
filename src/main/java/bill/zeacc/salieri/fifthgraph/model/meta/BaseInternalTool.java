@@ -51,7 +51,7 @@ public abstract class BaseInternalTool implements InternalTool, InitializingBean
 		return new ToolResponse ( toolExecutionId, getName ( ), result ) ;
 	}
 
-	protected abstract String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException ;
+	public abstract String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException ;
 
 	protected String getToolExecutionId (Map <String, Object> argsMap ) {
 		return UUID.randomUUID ( ).toString ( ) ;
@@ -61,7 +61,7 @@ public abstract class BaseInternalTool implements InternalTool, InitializingBean
 		Map <String, Object> convertedObjects = new HashMap <> ( ) ;
 		for ( ToolArgumentSpec arg : arguments ) {
 			if ( arg.isRequired ( ) && ! argsMap.containsKey ( arg.getArgName ( ) ) ) {
-				throw new IllegalArgumentException ( "Missing argument: " + arg.getArgName ( ) ) ;
+				throw new IllegalArgumentException ( "Missing required argument: " + arg.getArgName ( ) ) ;
 			}
 			Object value = argsMap.get ( arg.getArgName ( ) ) ;
 			String expectedType = arg.getType ( ) ;
@@ -77,7 +77,7 @@ public abstract class BaseInternalTool implements InternalTool, InitializingBean
 
 	protected Object convert ( Object value, String expectedType ) {
 		if ( "string".equals ( expectedType ) ) {
-			return value.toString ( ) ;
+			return value == null ? null : value.toString ( ) ;
 		}
 		// Add more type conversions as needed
 		return null ;

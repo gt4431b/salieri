@@ -28,6 +28,9 @@ public class Sandbox {
 	public String getFromSandbox ( Codebase cb, String handle ) {
 		Path p = Path.of ( cb.getSandboxRootPath ( ), handle ) ;
 		if ( ! p.toFile ( ).exists ( ) ) {
+			if ( handle.equals ( ".__directory.json" ) ) {
+				return null ;
+			}
 			throw new RuntimeException ( "File not found in sandbox: " + p ) ;
 		}
 		try {
@@ -51,8 +54,8 @@ public class Sandbox {
 		dir.files.addAll ( ls.values ( ) ) ;
 		String strDir ;
 		try {
-			strDir = om.writeValueAsString ( dir ) ;
-			writeFile ( "directory", "", strDir ) ;
+			strDir = getObjectMapper().writeValueAsString ( dir ) ;
+			writeFile ( "__directory.json", cb.getSandboxRootPath ( ), strDir ) ;
 		} catch ( JsonProcessingException e ) {
 			throw new RuntimeException ( e ) ;
 		}
@@ -72,7 +75,7 @@ public class Sandbox {
 
 	public void saveObjectToSandbox ( Codebase cb, String category, String handle, Object contents, String comment ) {
 		try {
-			saveToSandbox ( cb, handle, category, om.writeValueAsString ( contents ), comment ) ;
+			saveToSandbox ( cb, handle, category, getObjectMapper().writeValueAsString ( contents ), comment ) ;
 		} catch ( JsonProcessingException e ) {
 			throw new RuntimeException ( "Failed to serialize file contents: " + handle, e ) ;
 		}
@@ -80,7 +83,12 @@ public class Sandbox {
 
 	public <T> T getFromSandbox ( Codebase cb, String handle, Class<T> clazz ) {
 		try {
-			return om.readValue ( getFromSandbox ( cb, handle ), clazz ) ;
+			String v = getFromSandbox ( cb, handle ) ;
+			if ( v == null ) {
+				return null ;
+			} else {
+				return getObjectMapper().readValue ( v, clazz ) ;
+			}
 		} catch ( JsonProcessingException e ) {
 			throw new RuntimeException ( "Failed to parse file contents: " + handle, e ) ;
 		}
@@ -88,10 +96,23 @@ public class Sandbox {
 
 	public <T> T getFromSandbox ( Codebase cb, String handle, TypeReference <T> type ) {
 		try {
-			return om.readValue ( getFromSandbox ( cb, handle ), type ) ;
+			String v = getFromSandbox ( cb, handle ) ;
+			if ( v == null ) {
+				return null ;
+			} else {
+				return getObjectMapper().readValue ( v, type ) ;
+			}
 		} catch ( JsonProcessingException e ) {
 			throw new RuntimeException ( "Failed to parse file contents: " + handle, e ) ;
 		}
+	}
+
+	public ObjectMapper getObjectMapper ( ) {
+		return om;
+	}
+
+	public void setObjectMapper ( ObjectMapper om ) {
+		this.om = om;
 	}
 
 	private record DirectoryListing ( List <FileListing> files ) { ; }

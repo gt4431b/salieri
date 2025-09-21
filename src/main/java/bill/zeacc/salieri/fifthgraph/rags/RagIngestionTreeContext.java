@@ -1,6 +1,5 @@
 package bill.zeacc.salieri.fifthgraph.rags ;
 
-import java.io.File ;
 import java.util.HashMap ;
 import java.util.Map ;
 
@@ -34,8 +33,17 @@ public class RagIngestionTreeContext {
 		currentProperties.put ( RagIngestionKeyInternal.LEVEL, RagIngestionLevel.ROOT ) ;
 	}
 
+	@SuppressWarnings ( "unchecked" )
 	public <T> T getProperty ( RagIngestionKey key, Class <T> type ) {
-		return doGetProperty ( key, type, currentProperties ) ;
+		Object candidate = doGetProperty ( key, type, currentProperties ) ;
+		if ( candidate == null ) {
+			return null ;
+		}
+		if ( ! type.isInstance ( candidate ) ) {
+			throw new IllegalArgumentException ( "Property " + key + " with value " + candidate + " of type " + candidate.getClass ( ) + " cannot be converted to type " + type.getName ( ) ) ;
+		} else {
+			return ( T ) candidate ;
+		}
 	}
 
 	public Integer getMaxDocumentBatchSize ( ) {

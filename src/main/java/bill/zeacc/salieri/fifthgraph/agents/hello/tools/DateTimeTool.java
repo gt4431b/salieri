@@ -36,7 +36,7 @@ public class DateTimeTool extends BaseInternalTool implements InternalTool {
 	}
 
 	@Override
-	protected String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
+	public String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
 		ZonedDateTime now = ZonedDateTime.now ( ZoneId.systemDefault ( ) ) ;
 		return now.format ( DateTimeFormatter.RFC_1123_DATE_TIME ) ;
 	}

@@ -41,7 +41,7 @@ public class SwitchboardAnalysisNode implements NodeAction <SwitchboardState>, A
 		String query = state.getQuery ( ) ;
 		log.info ( "Analyzing query to determine best agent: {}", query ) ;
 
-		String strResponse = chatModel.call ( new Prompt ( getSystemPrompt ( ), new UserMessage ( query ) ) ).getResult ( ).getOutput ( ).getText ( ) ;
+		String strResponse = getChatModel().call ( new Prompt ( getSystemPrompt ( ), new UserMessage ( query ) ) ).getResult ( ).getOutput ( ).getText ( ) ;
 		try {
 			SwitchboardResult analysisResult = om.readValue ( strResponse, SwitchboardResult.class ) ;
 			log.debug ( "Analyzer response: {}", strResponse ) ;
@@ -93,5 +93,17 @@ Respond ONLY in JSON format:
 	@Override
 	public void setApplicationContext ( ApplicationContext applicationContext ) throws BeansException {
 		this.applicationContext = applicationContext ;
+	}
+
+	public void setObjectMapper ( ObjectMapper objectMapper ) {
+		this.om = objectMapper ;
+	}
+
+	public ChatModel getChatModel ( ) {
+		return chatModel;
+	}
+
+	public void setChatModel ( ChatModel chatModel ) {
+		this.chatModel = chatModel;
 	}
 }

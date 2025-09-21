@@ -98,30 +98,6 @@ public class DebouncedStdInBlocks {
         CompletableFuture.runAsync(() -> onBlock.accept(block, done));
     }
 
-    // --- Example main (replace the handler body with your graph call) ---
-    public static void main(String[] args) {
-    	CliContext ctx = new CliContext ( ) ;
-    	DebouncedStdInBlocks d = new DebouncedStdInBlocks(ctx, System.in, 7000, (block, done) -> {
-            try {
-                System.out.println("=== Processing Block ===");
-                System.out.print("Block \"" + block + "\"");
-                // Simulate your synchronous graph call here:
-                // String out = graphService.processQuery(block);
-                // System.out.println(out);
-                if ( "STOP".equalsIgnoreCase(block.trim()) ) {
-					System.out.println("=== Stopping ===");
-					ctx.stop ( ) ;
-					System.exit ( 0 ) ;
-				}
-                System.out.println("=== Done ===");
-            } finally {
-                done.run(); // IMPORTANT: signal ready for the next block
-            }
-        });
-        d.start();
-        try { Thread.currentThread().join(); } catch (InterruptedException ignored) {}
-    }
-
     public static class CliContext {
     	private DebouncedStdInBlocks debouncer ;
 

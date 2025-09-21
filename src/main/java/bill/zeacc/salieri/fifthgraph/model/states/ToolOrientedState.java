@@ -41,4 +41,8 @@ public class ToolOrientedState extends ResultOrientedState {
 	public List <ToolResponse> getToolResults ( ) {
 		return this.<List <ToolResponse>>value ( TOOL_RESULTS_KEY ).orElse ( List.of ( ) ) ;
 	}
+
+	public String getAnalysisResults ( ) {
+		return ( String ) this.value ( ANALYSIS_KEY ).orElse ( List.of ( ) ) ;
+	}
 }

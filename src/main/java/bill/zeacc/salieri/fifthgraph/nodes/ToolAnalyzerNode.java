@@ -29,7 +29,7 @@ public abstract class ToolAnalyzerNode implements NodeAction <ToolOrientedState>
 
 	protected ToolAnalyzerNode ( ChatModel chatModel, @Qualifier ( "helloTools" ) ToolChooser toolProvider ) {
 		this.chatModel = chatModel ;
-		this.availableTools = toolProvider.get ( ) ;
+		this.availableTools = toolProvider == null ? Collections.emptyList ( ) : toolProvider.get ( ) ;
 	}
 
 	@Override
@@ -47,9 +47,8 @@ public abstract class ToolAnalyzerNode implements NodeAction <ToolOrientedState>
 
 		AnalysisResult analysisResult ;
 		try {
-			analysisResult = om.readValue ( strResponse, AnalysisResult.class ) ;
+			analysisResult = getObjectMapper().readValue ( strResponse, AnalysisResult.class ) ;
 		} catch ( JsonProcessingException e ) {
-			e.printStackTrace();
 			throw new RuntimeException ( "Failed to parse analysis response: " + strResponse, e ) ;
 		}
 
@@ -84,7 +83,7 @@ public abstract class ToolAnalyzerNode implements NodeAction <ToolOrientedState>
 		}
 		String argsJson ;
 		try {
-			argsJson = om.writeValueAsString ( argsMap ) ;
+			argsJson = getObjectMapper().writeValueAsString ( argsMap ) ;
 		} catch ( JsonProcessingException e ) {
 			throw new RuntimeException ( "Failed to serialize tool arguments for tool: " + toolName, e ) ;
 		}
@@ -213,6 +212,14 @@ _Output:*
 			sb.append ( "Tool: " ).append ( tool.getName ( ) ).append ( " - " ).append ( tool.getDescription ( ) ).append ( " - invocation spec: " ).append ( tool.executionSpec ( ) ).append ( System.lineSeparator ( ) ) ;
 		}
 		return sb.toString ( ) ;
+	}
+
+	public ObjectMapper getObjectMapper ( ) {
+		return om;
+	}
+
+	public void setObjectMapper ( ObjectMapper om ) {
+		this.om = om;
 	}
 
 	private record AnalysisResult ( boolean needsTools, List <Invocation> tools ) { ; }

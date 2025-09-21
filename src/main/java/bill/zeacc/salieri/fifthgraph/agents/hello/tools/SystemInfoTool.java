@@ -36,7 +36,7 @@ public class SystemInfoTool extends BaseInternalTool implements InternalTool {
 	}
 
 	@Override
-	protected String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
+	public String doExecute ( String toolExecutionId, Map <String, Object> argsMap ) throws IOException {
 		Map <String, String> info = new HashMap <> ( ) ;
 		info.put ( "hostname", InetAddress.getLocalHost ( ).getHostName ( ) ) ;
 		info.put ( "os", System.getProperty ( "os.name" ) ) ;
