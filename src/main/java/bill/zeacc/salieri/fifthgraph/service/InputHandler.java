@@ -77,8 +77,7 @@ public class InputHandler {
         
         // This should never happen with current implementation, but handle gracefully
         log.warn("Unexpected input action type: {}", action.getType());
-        String errorResponse = responseFormatter.formatError("Unexpected input type");
-        System.out.print(errorResponse);
+        System.out.print(responseFormatter.formatError("Unexpected input type"));
     }
 
     private void handleExitAction(String sessionId, DebouncedStdInBlocks.CliContext ctx) {
