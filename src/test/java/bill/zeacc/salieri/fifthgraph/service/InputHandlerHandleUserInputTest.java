@@ -64,9 +64,12 @@ public class InputHandlerHandleUserInputTest {
         // Given
         String userInput = "exit";
         String sessionId = "test-session";
-        DebouncedStdInBlocks.CliContext mockCtx = mock(DebouncedStdInBlocks.CliContext.class);
+        DebouncedStdInBlocks.CliContext mockCtx = new DebouncedStdInBlocks.CliContext ( ) ;
+        DebouncedStdInBlocks dsib = mock(DebouncedStdInBlocks.class);
         String goodbyeMessage = "\nGoodbye!";
 
+        mockCtx.setTestMode ( true ) ;
+        mockCtx.init ( dsib );
         when(mockSessionManager.terminateSession(sessionId)).thenReturn(true);
         when(mockResponseFormatter.formatGoodbye()).thenReturn(goodbyeMessage);
 
@@ -76,7 +79,7 @@ public class InputHandlerHandleUserInputTest {
         // Then
         verify(mockSessionManager).terminateSession(sessionId);
         verify(mockResponseFormatter).formatGoodbye();
-        verify(mockCtx).stop();
+        verify(dsib).stop();
     }
 
     @Test
@@ -102,19 +105,22 @@ public class InputHandlerHandleUserInputTest {
         // Given
         String userInput = "quit";
         String sessionId = "test-session";
-        DebouncedStdInBlocks.CliContext mockCtx = mock(DebouncedStdInBlocks.CliContext.class);
+        DebouncedStdInBlocks.CliContext mockCtx = new DebouncedStdInBlocks.CliContext ( ) ;
+        DebouncedStdInBlocks dsib = mock(DebouncedStdInBlocks.class);
         String goodbyeMessage = "\nGoodbye!";
 
         when(mockSessionManager.terminateSession(sessionId)).thenReturn(false); // Simulate failure
         when(mockResponseFormatter.formatGoodbye()).thenReturn(goodbyeMessage);
 
         // When
+        mockCtx.setTestMode ( true ) ;
+        mockCtx.init ( dsib ) ;
         inputHandler.handleUserInput(userInput, sessionId, mockCtx);
 
         // Then - should still proceed with goodbye and stop
         verify(mockSessionManager).terminateSession(sessionId);
         verify(mockResponseFormatter).formatGoodbye();
-        verify(mockCtx).stop();
+        verify(dsib).stop();
     }
 
     @Test
@@ -181,19 +187,22 @@ public class InputHandlerHandleUserInputTest {
         // Given
         String userInput = "EXIT";
         String sessionId = "test-session";
-        DebouncedStdInBlocks.CliContext mockCtx = mock(DebouncedStdInBlocks.CliContext.class);
+        DebouncedStdInBlocks.CliContext mockCtx = new DebouncedStdInBlocks.CliContext ( ) ;
+        DebouncedStdInBlocks dsib = mock(DebouncedStdInBlocks.class);
         String goodbyeMessage = "\nGoodbye!";
 
         when(mockSessionManager.terminateSession(sessionId)).thenReturn(true);
         when(mockResponseFormatter.formatGoodbye()).thenReturn(goodbyeMessage);
 
         // When
+        mockCtx.setTestMode ( true ) ;
+        mockCtx.init ( dsib ) ;
         inputHandler.handleUserInput(userInput, sessionId, mockCtx);
 
         // Then
         verify(mockSessionManager).terminateSession(sessionId);
         verify(mockResponseFormatter).formatGoodbye();
-        verify(mockCtx).stop();
+        verify(dsib).stop();
     }
 
     @Test

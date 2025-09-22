@@ -93,6 +93,15 @@ public class InputHandler {
         
         System.out.println(goodbyeMessage);
         ctx.stop();
+        Thread.currentThread().interrupt(); // Signal main thread to exit
+        try {
+			Thread.sleep(5000); // Give some time for graceful shutdown
+		} catch ( InterruptedException e ) {
+			;
+		}
+        if ( ! ctx.isTestMode ( ) ) {
+        	System.exit(0);
+        }
     }
 
     private void handleIgnoreAction(InputAction action) {

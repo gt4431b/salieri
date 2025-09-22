@@ -100,6 +100,7 @@ public class DebouncedStdInBlocks {
 
     public static class CliContext {
     	private DebouncedStdInBlocks debouncer ;
+    	private boolean testMode = false ;
 
     	public CliContext ( ) {
     		;
@@ -111,6 +112,14 @@ public class DebouncedStdInBlocks {
 
     	public void stop ( ) {
 			debouncer.stop ( ) ;
+		}
+
+		public boolean isTestMode ( ) {
+			return testMode;
+		}
+
+		public void setTestMode ( boolean b ) {
+			this.testMode = b ;
 		}
     }
 }
