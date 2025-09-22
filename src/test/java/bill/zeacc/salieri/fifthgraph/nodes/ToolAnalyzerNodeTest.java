@@ -19,7 +19,7 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 
-import com.fasterxml.jackson.core.JsonParseException ;
+import com.fasterxml.jackson.core.JsonProcessingException ;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bill.zeacc.salieri.fifthgraph.model.meta.BaseInternalTool ;
@@ -291,7 +291,8 @@ public class ToolAnalyzerNodeTest {
             .isInstanceOf(NumberFormatException.class);
     }
 
-    @Test
+    @SuppressWarnings ( "serial" )
+	@Test
     @DisplayName("Should handle JSON serialization failure for tool arguments")
     public void shouldHandleJsonSerializationFailureForToolArguments() throws Exception {
         // Given
@@ -303,7 +304,7 @@ public class ToolAnalyzerNodeTest {
         when(faultyObjectMapper.readValue(anyString(), eq(TestToolAnalyzerNode.AnalysisResult.class)))
             .thenReturn(objectMapper.readValue(analysisResponse, TestToolAnalyzerNode.AnalysisResult.class));
         when(faultyObjectMapper.writeValueAsString(any()))
-            .thenThrow(new com.fasterxml.jackson.core.JsonProcessingException("Serialization failed") {});
+            .thenThrow(new JsonProcessingException("Serialization failed") {});
 
         toolAnalyzerNode.setObjectMapper(faultyObjectMapper);
 

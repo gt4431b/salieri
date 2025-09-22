@@ -271,11 +271,10 @@ public class SandboxTest {
         assertThat(Files.readString(savedFile2)).isEqualTo(contents2);
         
         // Verify directory listing was created
-        Path directoryFile = tempDir.resolve("__directory.json");
+        Path directoryFile = tempDir.resolve(".__directory.json");
         assertThat(directoryFile).exists();
         String directoryContent = Files.readString(directoryFile);
-        // FIXME: Problem.  Directory is missing handle1 and comment1.
-//        assertThat(directoryContent).contains(handle1, handle2, comment1, comment2);
+        assertThat(directoryContent).contains(handle1, handle2, comment1, comment2);
     }
 
     @Test
@@ -288,6 +287,29 @@ public class SandboxTest {
         assertThrows(RuntimeException.class, () -> {
 			sandbox.getFromSandbox(mockCodebase, "__directory.json");
 		});
+    }
+
+    @Test
+    public void getFromSandboxByTypeInferenceReturningNull ( ) throws Exception {
+		// Given
+		when(mockCodebase.getSandboxRootPath()).thenReturn(tempDir.toString());
+
+		// When/Then
+		Object result = sandbox.getFromSandbox(mockCodebase, ".__directory.json", new TypeReference<Object>() {});
+		assertThat(result).isNull();
+    }
+
+    @Test
+    public void orderedFileListingTest ( ) throws Exception {
+    	Sandbox.FileListing fl1 = new Sandbox.FileListing ( "cat", "a", "first" ) ;
+    	Sandbox.FileListing fl2 = new Sandbox.FileListing ( "cat", "b", "second" ) ;
+    	Sandbox.FileListing fl3 = new Sandbox.FileListing ( "cat", "c", "third" ) ;
+    	Sandbox.FileListing fl4 = new Sandbox.FileListing ( "cat", "a", "fourth" ) ;
+    	assertThat ( fl1.compareTo ( fl2 ) ).isLessThan ( 0 ) ;
+    	assertThat ( fl2.compareTo ( fl1 ) ).isGreaterThan ( 0 ) ;
+    	assertThat ( fl1.compareTo ( fl3 ) ).isLessThan ( 0 ) ;
+    	assertThat ( fl3.compareTo ( fl1 ) ).isGreaterThan ( 0 ) ;
+    	assertThat ( fl1.compareTo ( fl4 ) ).isEqualTo ( 0 ) ;
     }
 
     // Test helper class

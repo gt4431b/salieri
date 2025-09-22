@@ -1,70 +1,58 @@
-package bill.zeacc.salieri.fifthgraph ;
+package bill.zeacc.salieri.fifthgraph;
 
 //Salieri.java - Main application class
-import org.springframework.boot.CommandLineRunner ;
-import org.springframework.boot.SpringApplication ;
-import org.springframework.boot.autoconfigure.SpringBootApplication ;
-import org.springframework.boot.context.properties.EnableConfigurationProperties ;
-import org.springframework.context.annotation.Bean ;
-import org.springframework.context.annotation.Profile ;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 
-import com.fasterxml.jackson.databind.ObjectMapper ;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import bill.zeacc.salieri.fifthgraph.agents.switchboard.SwitchboardState ;
-import bill.zeacc.salieri.fifthgraph.config.LLMProperties ;
-import bill.zeacc.salieri.fifthgraph.model.states.ResultOrientedState ;
-import bill.zeacc.salieri.fifthgraph.service.GraphService ;
-import bill.zeacc.salieri.fifthgraph.util.DebouncedStdInBlocks ;
-import lombok.extern.slf4j.Slf4j ;
+import bill.zeacc.salieri.fifthgraph.config.LLMProperties;
+import bill.zeacc.salieri.fifthgraph.service.InputHandler;
+import bill.zeacc.salieri.fifthgraph.service.ResponseFormatter;
+import bill.zeacc.salieri.fifthgraph.service.SessionManager;
+import bill.zeacc.salieri.fifthgraph.util.DebouncedStdInBlocks;
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
-@EnableConfigurationProperties ( LLMProperties.class )
+@EnableConfigurationProperties(LLMProperties.class)
 @Slf4j
 public class Salieri {
 
-	public static void main ( String [ ] args ) {
-		SpringApplication.run ( Salieri.class, args ) ;
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Salieri.class, args);
+    }
 
-	@Bean
-	@Profile("!test")
-	public CommandLineRunner commandLineRunner ( GraphService graphService, ObjectMapper om ) {
-		String sessionId = java.util.UUID.randomUUID ( ).toString ( ) ;
-		System.out.println ( "Assistant: Hello! How can I assist you today?" ) ;
-		return args -> {
-			DebouncedStdInBlocks.CliContext ctx = new DebouncedStdInBlocks.CliContext ( ) ;
-			DebouncedStdInBlocks reader = new DebouncedStdInBlocks ( ctx, System.in, 2000, (input, done) -> {
-	            try {
-					input = input.trim ( ) ;
-					if ( input.equalsIgnoreCase ( "exit" ) || input.equalsIgnoreCase ( "quit" ) ) {
-						System.out.println ( "\nGoodbye!" ) ;
-						ctx.stop ( ) ;
-					}
-
-					if ( input.trim ( ).isEmpty ( ) ) {
-						return ;
-					}
-
-					try {
-						ResultOrientedState response = graphService.processQuery ( "switchboard_agent", input, sessionId ) ;
-						String nextAgent = ( String ) response.value ( SwitchboardState.RECOMMENDED_AGENT_KEY ).get ( ) ;
-						Integer confidence = ( Integer ) response.value ( SwitchboardState.CONFIDENCE_KEY ).get ( ) ;
-						if ( confidence < 50 ) {
-							nextAgent = "default_agent" ;
-						}
-						response = graphService.processQuery ( nextAgent, input, sessionId ) ;
-						String result = response.getFinalAnswer ( ) ;
-						System.out.println ( "\nAssistant: " + result + "\n" ) ;
-					} catch ( Exception e ) {
-						log.error ( "Error processing query", e ) ;
-						System.err.println ( "Error: " + e.getMessage ( ) + "\n" ) ;
-					}
-	            } finally {
-	                done.run(); // IMPORTANT: signal ready for the next block
-	            }
-	        });
-			reader.start();
-	        try { Thread.currentThread().join(); } catch (InterruptedException ignored) {}
-		} ;
-	}
+    @Bean
+    @Profile("!test")
+    public CommandLineRunner commandLineRunner(
+            InputHandler inputHandler,
+            ResponseFormatter responseFormatter,
+            SessionManager sessionManager,
+            ObjectMapper om) {
+        
+        // Create session and display welcome message
+        String sessionId = sessionManager.createSession();
+        System.out.println(responseFormatter.formatWelcome());
+        
+        return args -> {
+            DebouncedStdInBlocks.CliContext ctx = new DebouncedStdInBlocks.CliContext();
+            DebouncedStdInBlocks reader = new DebouncedStdInBlocks(ctx, System.in, 2000, (input, done) -> {
+                try {
+                    inputHandler.handleUserInput(input, sessionId, ctx);
+                } finally {
+                    done.run(); // IMPORTANT: signal ready for the next block
+                }
+            });
+            reader.start();
+            try { 
+                Thread.currentThread().join(); 
+            } catch (InterruptedException ignored) {
+                sessionManager.terminateSession(sessionId);
+            }
+        };
+    }
 }

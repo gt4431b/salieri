@@ -222,7 +222,7 @@ _Output:*
 		this.om = om;
 	}
 
-	private record AnalysisResult ( boolean needsTools, List <Invocation> tools ) { ; }
+	record AnalysisResult ( boolean needsTools, List <Invocation> tools ) { ; }
 
 	private record Invocation ( String invocation, List <InvocationArg> args, String justification ) { ; }
 

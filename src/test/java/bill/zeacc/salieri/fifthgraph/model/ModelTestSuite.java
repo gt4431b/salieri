@@ -4,6 +4,8 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
+import bill.zeacc.salieri.fifthgraph.model.feedback.BaseFeedbackTest ;
+import bill.zeacc.salieri.fifthgraph.model.feedback.GradeTest ;
 import bill.zeacc.salieri.fifthgraph.model.meta.AgentDescriptorTest;
 import bill.zeacc.salieri.fifthgraph.model.meta.ToolCallTest;
 import bill.zeacc.salieri.fifthgraph.model.meta.ToolResponseTest;
@@ -23,7 +25,9 @@ import bill.zeacc.salieri.fifthgraph.model.states.ToolOrientedStateTest;
     ToolOrientedStateTest.class,
     EngineeringStateTest.class,
     ResultOrientedStateTest.class,
-    ToolOrientedStateTest.class
+    ToolOrientedStateTest.class,
+    BaseFeedbackTest.class,
+    GradeTest.class
 })
 public class ModelTestSuite {
 }

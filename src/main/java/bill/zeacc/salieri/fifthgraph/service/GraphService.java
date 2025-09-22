@@ -60,7 +60,6 @@ public class GraphService {
 				finalState = ( ResultOrientedState ) output.state ( ) ;
 			}
 		} catch ( Exception e ) {
-			log.error ( "Error processing query", e ) ;
 			throw new RuntimeException ( "Error processing query: " + e.getMessage ( ), e ) ;
 		}
 

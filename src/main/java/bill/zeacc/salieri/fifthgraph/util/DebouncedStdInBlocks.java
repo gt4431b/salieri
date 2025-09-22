@@ -70,7 +70,7 @@ public class DebouncedStdInBlocks {
         pending = scheduler.schedule(this::flushIfIdle, quietMillis, TimeUnit.MILLISECONDS);
     }
 
-    private void flushIfIdle() {
+    void flushIfIdle() {
         synchronized (lock) {
             if (processing || current.length() == 0) return;
             flushNow();

@@ -55,16 +55,12 @@ public class SwitchboardAnalysisNode implements NodeAction <SwitchboardState>, A
 	// Second workaround for stupid spring circular dependency thing
 	private Message getSystemPrompt ( ) {
 		if ( systemPrompt == null ) {
-			try {
-				systemPrompt = buildSystemPrompt ( ) ;
-			} catch ( JsonProcessingException e ) {
-				throw new RuntimeException ( "Failed to build system prompt", e ) ;
-			}
+			systemPrompt = buildSystemPrompt ( ) ;
 		}
 		return systemPrompt ;
 	}
 
-	private SystemMessage buildSystemPrompt ( ) throws JsonProcessingException {
+	private SystemMessage buildSystemPrompt ( ) {
 		String prompt = """
 Here's a list of available agents, with some hints on when to use them, in json format.
 
@@ -79,7 +75,12 @@ Respond ONLY in JSON format:
 				""" ;
 
 		List <AgentDescriptor> agents = graphSvc ( ).listAgents ( ) ;
-		String jsonAgents = om.writeValueAsString ( agents ) ;
+		String jsonAgents ;
+		try {
+			jsonAgents = om.writeValueAsString ( agents ) ;
+		} catch ( JsonProcessingException e ) {
+			throw new RuntimeException ( "Failed to serialize agent list to json", e ) ;
+		}
 
 		prompt = prompt.formatted ( jsonAgents ) ;
 		return new SystemMessage ( prompt ) ;

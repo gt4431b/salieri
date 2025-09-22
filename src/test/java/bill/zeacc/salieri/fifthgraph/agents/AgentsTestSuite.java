@@ -11,6 +11,7 @@ import bill.zeacc.salieri.fifthgraph.agents.hello.tools.DateTimeToolTest;
 import bill.zeacc.salieri.fifthgraph.agents.hello.tools.FileReaderToolTest ;
 import bill.zeacc.salieri.fifthgraph.agents.hello.tools.SystemInfoToolTest ;
 import bill.zeacc.salieri.fifthgraph.agents.justchat.config.JustChatConfigTest ;
+import bill.zeacc.salieri.fifthgraph.agents.switchboard.config.SwitchboardAgentConfigTest ;
 import bill.zeacc.salieri.fifthgraph.agents.switchboard.nodes.SwitchboardAnalysisNodeTest ;
 
 /**
@@ -26,7 +27,8 @@ import bill.zeacc.salieri.fifthgraph.agents.switchboard.nodes.SwitchboardAnalysi
     FileReaderToolTest.class,
     SystemInfoToolTest.class,
     JustChatConfigTest.class,
-    SwitchboardAnalysisNodeTest.class
+    SwitchboardAnalysisNodeTest.class,
+    SwitchboardAgentConfigTest.class
 })
 public class AgentsTestSuite {
 }

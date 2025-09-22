@@ -79,6 +79,12 @@ public class SwitchboardAnalysisNodeTest {
         assertNotNull(resultMap);
         assertEquals("weather_agent", resultMap.get(SwitchboardState.RECOMMENDED_AGENT_KEY));
         assertEquals(85, resultMap.get(SwitchboardState.CONFIDENCE_KEY));
+
+        // Re-act
+        resultMap = analysisNode.apply(state);
+        assertNotNull(resultMap);
+        assertEquals("weather_agent", resultMap.get(SwitchboardState.RECOMMENDED_AGENT_KEY));
+        assertEquals(85, resultMap.get(SwitchboardState.CONFIDENCE_KEY));
     }
 
 	@Test

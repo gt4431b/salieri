@@ -45,7 +45,7 @@ public class Sandbox {
 		DirectoryListing dir = getFromSandbox ( cb, ".__directory.json", DirectoryListing.class ) ;
 		if ( dir == null ) {
 			dir = new DirectoryListing ( new ArrayList <> ( ) ) ;
-			dir.files ( ).add ( new FileListing ( "", "directory", "Sandbox contents" ) ) ;
+			dir.files ( ).add ( new FileListing ( "", ".__directory.json", "Sandbox contents" ) ) ;
 		}
 		Map <String, FileListing> ls = dir.files ( ).stream ( ).collect ( Collectors.toMap ( fl -> fl.category ( ) + "/" + fl.handle ( ), fl -> fl, ( a, b ) -> b, ( ) -> new TreeMap <> ( ) ) ) ;
 		FileListing thisFile = new FileListing ( category, handle, comment ) ;
@@ -55,7 +55,7 @@ public class Sandbox {
 		String strDir ;
 		try {
 			strDir = getObjectMapper().writeValueAsString ( dir ) ;
-			writeFile ( "__directory.json", cb.getSandboxRootPath ( ), strDir ) ;
+			writeFile ( ".__directory.json", cb.getSandboxRootPath ( ), strDir ) ;
 		} catch ( JsonProcessingException e ) {
 			throw new RuntimeException ( e ) ;
 		}
@@ -115,8 +115,8 @@ public class Sandbox {
 		this.om = om;
 	}
 
-	private record DirectoryListing ( List <FileListing> files ) { ; }
-	private record FileListing ( String category, String handle, String comment ) implements Comparable <FileListing> {
+	record DirectoryListing ( List <FileListing> files ) { ; }
+	record FileListing ( String category, String handle, String comment ) implements Comparable <FileListing> {
 
 		@Override
 		public int compareTo ( FileListing that ) {

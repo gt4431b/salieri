@@ -12,7 +12,7 @@ import bill.zeacc.salieri.fifthgraph.model.meta.AgentDefinition ;
 import static bill.zeacc.salieri.fifthgraph.util.NodeHelper.toAsync ;
 
 @Configuration
-public class SwithboardAgentConfig {
+public class SwitchboardAgentConfig {
 
 	@Bean
 	public AgentDefinition <SwitchboardState> switchboardAgent ( SwitchboardAnalysisNode analysisNode ) throws GraphStateException {

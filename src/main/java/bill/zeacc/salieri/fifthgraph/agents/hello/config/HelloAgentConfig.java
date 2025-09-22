@@ -41,6 +41,22 @@ public class HelloAgentConfig {
 		return new ToolExecutorNode ( availableTools ) { } ;
 	}
 
+	/**
+	 * Determines the routing logic for the hello agent graph.
+	 * This method is exposed for testing purposes to achieve proper branch coverage.
+	 * 
+	 * @param state The current graph state
+	 * @return CompletableFuture containing the next node name ("tool_executor" or "formatter")
+	 */
+	CompletableFuture<String> routeOnTools(GraphState state) {
+		List<ToolCall> toolCalls = state.getToolCalls();
+		List<ToolResponse> toolResults = state.getToolResults();
+		if (!toolCalls.isEmpty() && toolResults.isEmpty()) {
+			return CompletableFuture.completedFuture("tool_executor");
+		}
+		return CompletableFuture.completedFuture("formatter");
+	}
+
 	@Bean
 	public AgentDefinition <GraphState> helloAgent ( @Qualifier ( "helloToolAnalyzerNode" ) ToolAnalyzerNode analyzerNode,
 								@Qualifier ( "helloToolExecutorNode" ) ToolExecutorNode toolExecutorNode,
@@ -48,15 +64,8 @@ public class HelloAgentConfig {
 		if ( analyzerNode == null || toolExecutorNode == null || responseFormatterNode == null ) {
 			throw new IllegalStateException ( "analyzerNode is null" ) ;
 		}
-		// Define conditional edge
-		AsyncEdgeAction <GraphState> routeOnTools = ( state ) -> {
-			List <ToolCall> toolCalls = state.getToolCalls ( ) ;
-			List <ToolResponse> toolResults = state.getToolResults ( ) ;
-			if ( ! toolCalls.isEmpty ( ) && toolResults.isEmpty ( ) ) { // Given we're calling this before tool execution, what's the point of checking toolResults?
-				return CompletableFuture.completedFuture ( "tool_executor" ) ;
-			}
-			return CompletableFuture.completedFuture ( "formatter" ) ;
-		} ;
+		// Use the extracted routing method
+		AsyncEdgeAction <GraphState> routeOnTools = this::routeOnTools;
 
 		// Build graph
 		StateGraph <GraphState> graph = new StateGraph <> ( GraphState.SCHEMA, GraphState::new )

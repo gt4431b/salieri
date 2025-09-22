@@ -482,4 +482,22 @@ public class DebouncedStdInBlocksTest {
         assertThat(capturedInput.get()).contains("line1", "line2", "line3", "line4");
         System.out.println("Finished shouldTestMultipleRapidInputsWithTiming()");
     }
+
+    @Test
+    public void testFlushIfIdleWhenProcessing() {
+		System.out.println("Starting testFlushIfIdleWhenProcessing()");
+		// Given
+		String input = "test\n";
+		testInputStream = new ByteArrayInputStream(input.getBytes());
+
+		debouncedStdIn = new DebouncedStdInBlocks(mockCliContext, testInputStream, 100, mockOnBlock);
+		debouncedStdIn.start();
+
+		// When
+		debouncedStdIn.flushIfIdle();
+
+		// Then - should not throw and not process since already processing
+		verify(mockOnBlock, never()).accept(anyString(), any(Runnable.class));
+		System.out.println("Finished testFlushIfIdleWhenProcessing()");
+	}	
 }

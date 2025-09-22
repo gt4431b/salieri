@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.bsc.langgraph4j.GraphStateException;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +20,9 @@ import org.springframework.ai.chat.model.ChatModel;
 
 import bill.zeacc.salieri.fifthgraph.agents.hello.GraphState;
 import bill.zeacc.salieri.fifthgraph.model.meta.AgentDefinition;
+import bill.zeacc.salieri.fifthgraph.model.meta.ToolCall;
 import bill.zeacc.salieri.fifthgraph.model.meta.ToolChooser;
+import bill.zeacc.salieri.fifthgraph.model.meta.ToolResponse;
 import bill.zeacc.salieri.fifthgraph.nodes.ResponseFormatterNode;
 import bill.zeacc.salieri.fifthgraph.nodes.ToolAnalyzerNode;
 import bill.zeacc.salieri.fifthgraph.nodes.ToolExecutorNode;
@@ -150,5 +155,195 @@ public class HelloAgentConfigTest {
         assertThat(node1).isNotNull();
         assertThat(node2).isNotNull();
         assertThat(node1).isNotSameAs(node2); // Should be different instances
+    }
+
+    @Test 
+    @DisplayName("Should validate agent definition properties are correctly set")
+    void shouldValidateAgentDefinitionProperties() throws GraphStateException {
+        // When
+        AgentDefinition<GraphState> agentDef = helloAgentConfig.helloAgent(
+            mockAnalyzerNode, mockToolExecutorNode, mockResponseFormatterNode);
+
+        // Then - Validate all properties
+        assertThat(agentDef.name()).isEqualTo("hello_agent");
+        assertThat(agentDef.description()).isEqualTo("A simple hello world agent using tools");
+        assertThat(agentDef.hintsForUse()).isEqualTo("Good for getting time, system information, or reading files.");
+        assertThat(agentDef.graph()).isNotNull();
+        assertThat(agentDef.stateBuilder()).isNotNull();
+        
+        // Test state builder functionality
+        GraphState testState = agentDef.stateBuilder().build("test query");
+        assertThat(testState).isNotNull();
+        assertThat(testState).isInstanceOf(GraphState.class);
+    }
+
+    @Test
+    @DisplayName("Should handle partial null node scenarios for comprehensive error testing")
+    void shouldHandlePartialNullNodeScenarios() {
+        // Test various combinations of null nodes to ensure proper error handling
+        
+        // Scenario 1: Only analyzer is null
+        assertThatThrownBy(() -> helloAgentConfig.helloAgent(null, mockToolExecutorNode, mockResponseFormatterNode))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("analyzerNode is null");
+            
+        // Scenario 2: Only tool executor is null  
+        assertThatThrownBy(() -> helloAgentConfig.helloAgent(mockAnalyzerNode, null, mockResponseFormatterNode))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("analyzerNode is null");
+            
+        // Scenario 3: Only response formatter is null
+        assertThatThrownBy(() -> helloAgentConfig.helloAgent(mockAnalyzerNode, mockToolExecutorNode, null))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("analyzerNode is null");
+    }
+
+    // DIRECT ROUTING TESTS - These test the exposed routeOnTools method directly
+
+    @Test
+    @DisplayName("Should route to tool_executor when tool calls present and no results")
+    void shouldRouteToToolExecutorWhenToolCallsPresentAndNoResults() throws Exception {
+        // Given
+        Map<String, Object> stateData = new HashMap<>();
+        List<ToolCall> toolCalls = List.of(new ToolCall("tool1", "test_tool", "{}"));
+        stateData.put("tool_calls", toolCalls);
+        stateData.put("tool_results", List.of());
+        GraphState state = new GraphState(stateData);
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("tool_executor");
+        assertThat(state.getToolCalls()).hasSize(1);
+        assertThat(state.getToolResults()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should route to formatter when no tool calls")
+    void shouldRouteToFormatterWhenNoToolCalls() throws Exception {
+        // Given
+        Map<String, Object> stateData = new HashMap<>();
+        stateData.put("tool_calls", List.of());
+        stateData.put("tool_results", List.of());
+        GraphState state = new GraphState(stateData);
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("formatter");
+        assertThat(state.getToolCalls()).isEmpty();
+        assertThat(state.getToolResults()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should route to formatter when tool calls and results both present")
+    void shouldRouteToFormatterWhenToolCallsAndResultsPresent() throws Exception {
+        // Given
+        Map<String, Object> stateData = new HashMap<>();
+        List<ToolCall> toolCalls = List.of(new ToolCall("tool1", "test_tool", "{}"));
+        List<ToolResponse> toolResults = List.of(new ToolResponse("tool1", "test_tool", "result"));
+        stateData.put("tool_calls", toolCalls);
+        stateData.put("tool_results", toolResults);
+        GraphState state = new GraphState(stateData);
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("formatter");
+        assertThat(state.getToolCalls()).hasSize(1);
+        assertThat(state.getToolResults()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should route to formatter when empty tool calls but results present")
+    void shouldRouteToFormatterWhenEmptyToolCallsButResultsPresent() throws Exception {
+        // Given
+        Map<String, Object> stateData = new HashMap<>();
+        stateData.put("tool_calls", List.of());
+        List<ToolResponse> toolResults = List.of(new ToolResponse("tool1", "test_tool", "result"));
+        stateData.put("tool_results", toolResults);
+        GraphState state = new GraphState(stateData);
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("formatter");
+        assertThat(state.getToolCalls()).isEmpty();
+        assertThat(state.getToolResults()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should route to formatter with null/default state")
+    void shouldRouteToFormatterWithNullDefaultState() throws Exception {
+        // Given - default state with no tool calls or results
+        GraphState state = new GraphState();
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("formatter");
+        assertThat(state.getToolCalls()).isEmpty(); // Should default to empty list
+        assertThat(state.getToolResults()).isEmpty(); // Should default to empty list
+    }
+
+    @Test
+    @DisplayName("Should route to tool_executor with multiple tool calls and no results")
+    void shouldRouteToToolExecutorWithMultipleToolCallsAndNoResults() throws Exception {
+        // Given
+        Map<String, Object> stateData = new HashMap<>();
+        List<ToolCall> multipleCalls = List.of(
+            new ToolCall("tool1", "test_tool1", "{}"),
+            new ToolCall("tool2", "test_tool2", "{}"),
+            new ToolCall("tool3", "test_tool3", "{}")
+        );
+        stateData.put("tool_calls", multipleCalls);
+        stateData.put("tool_results", List.of());
+        GraphState state = new GraphState(stateData);
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("tool_executor");
+        assertThat(state.getToolCalls()).hasSize(3);
+        assertThat(state.getToolResults()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should route to formatter with mismatched calls and results")
+    void shouldRouteToFormatterWithMismatchedCallsAndResults() throws Exception {
+        // Given - more tool calls than results (but results not empty)
+        Map<String, Object> stateData = new HashMap<>();
+        List<ToolCall> toolCalls = List.of(
+            new ToolCall("tool1", "test_tool1", "{}"),
+            new ToolCall("tool2", "test_tool2", "{}"),
+            new ToolCall("tool3", "test_tool3", "{}")
+        );
+        List<ToolResponse> toolResults = List.of(
+            new ToolResponse("tool1", "test_tool1", "result1")
+        );
+        stateData.put("tool_calls", toolCalls);
+        stateData.put("tool_results", toolResults);
+        GraphState state = new GraphState(stateData);
+        
+        // When
+        CompletableFuture<String> result = helloAgentConfig.routeOnTools(state);
+        
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.get()).isEqualTo("formatter");
+        assertThat(state.getToolCalls()).hasSize(3);
+        assertThat(state.getToolResults()).hasSize(1);
     }
 }

@@ -10,7 +10,11 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 @Suite
 @SuiteDisplayName("Service Test Suite")
 @SelectClasses({
-    GraphServiceTest.class
+    GraphServiceTest.class,
+    InputHandlerTest.class,
+    QueryProcessorTest.class,
+    ResponseFormatterTest.class,
+    SessionManagerTest.class
 })
 public class ServiceTestSuite {
 }

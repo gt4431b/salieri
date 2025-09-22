@@ -234,11 +234,10 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.3.0</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*Suite.java</exclude>
-						<exclude>**/SalieriTest.java</exclude>
+<!--						<exclude>**/SalieriTest.java</exclude> -->
 					</excludes>
 				</configuration>
 			</plugin>
@@ -257,8 +256,29 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<excludes>
+								<!-- Exclude firstgraph, secondgraph, thirdgraph, fourthgraph packages -->
+								<exclude>bill/zeacc/salieri/firstgraph/**</exclude>
+								<exclude>bill/zeacc/salieri/secondgraph/**</exclude>
+								<exclude>bill/zeacc/salieri/thirdgraph/**</exclude>
+								<exclude>bill/zeacc/salieri/fourthgraph/**</exclude>
+								<!-- Exclude fifthgraph rags package -->
+								<exclude>bill/zeacc/salieri/fifthgraph/rags/**</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<excludes>
+						<!-- Global exclusions to remove from instrumentation entirely -->
+						<exclude>bill/zeacc/salieri/firstgraph/**</exclude>
+						<exclude>bill/zeacc/salieri/secondgraph/**</exclude>
+						<exclude>bill/zeacc/salieri/thirdgraph/**</exclude>
+						<exclude>bill/zeacc/salieri/fourthgraph/**</exclude>
+						<exclude>bill/zeacc/salieri/fifthgraph/rags/**</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
